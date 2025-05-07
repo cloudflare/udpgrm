@@ -61,25 +61,6 @@ static void _skey_from_bpf_sock(struct reuseport_storage_key *skey, struct bpf_s
 	}
 }
 
-static char *skey_sprint(struct reuseport_storage_key *skey)
-{
-	static char buf[64];
-	memset(buf, 0, sizeof(buf));
-
-	// If BPF hooks wouldn't suck, we'd have network namespace
-	// cookie and bound ifnumber here as well.
-	if (skey->family == AF_INET) {
-		uint64_t ip = skey->src_ip4;
-		BPF_SNPRINTF(buf, 64, "udp://%pI4:%d", &ip, skey->src_port);
-	} else if (skey->family == AF_INET6) {
-		BPF_SNPRINTF(buf, 64, "udp://[%pI6]:%d", (void *)&skey->src_ip6,
-			     skey->src_port);
-	} else {
-		BPF_SNPRINTF(buf, 64, "unknown://");
-	}
-	return buf;
-}
-
 /* Too large for stack. Put it in RO. */
 static struct reuseport_storage empty_state = {};
 
@@ -99,7 +80,7 @@ static struct reuseport_storage *get_state(struct bpf_sock *sk, int create,
 		}
 		if (created_ptr)
 			*created_ptr = 1;
-		log_printf("[#] %s - socket group created\n", skey_sprint(&skey));
+		log_printfs(&skey, "[#] socket group created\n");
 		state = bpf_map_lookup_elem(&reuseport_storage_map, &skey);
 	}
 	return state;
@@ -534,8 +515,7 @@ int udpgrm_setsockopt(struct bpf_sockopt *ctx)
 			e.app_working_gen = data->wrk.working_gen;
 			_skey_from_bpf_sock(&e.skey, ctx->sk);
 
-			log_printf("[+] %s - setting working gen %d (old=%d) (app=%d)\n",
-				   skey_sprint(&e.skey), data->wrk.working_gen, old,
+			log_printfs(&e.skey, "[+] setting working gen %d (old=%d) (app=%d)\n", data->wrk.working_gen, old,
 				   app_idx);
 
 			unsigned ll = offsetof(struct msg_value, app_so_cookie) + 8;
@@ -570,7 +550,7 @@ int udpgrm_setsockopt(struct bpf_sockopt *ctx)
 			e.socket_app = s->sock_app;
 			_skey_from_bpf_sock(&e.skey, ctx->sk);
 
-			log_printf("[+] %s - registering socket ", skey_sprint(&e.skey));
+			log_printfs(&e.skey, "[+] registering socket ");
 			log_printf("so_cookie=0x%lx app=%d gen=%d pid=%d\n", s->so_cookie,
 				   s->sock_app, s->sock_gen, ts->pid);
 
@@ -656,7 +636,7 @@ int udpgrm_setsockopt(struct bpf_sockopt *ctx)
 		e.value = 0;
 		_skey_from_bpf_sock(&e.skey, ctx->sk);
 
-		log_printf("[+] %s - setting dissector type %d\n", skey_sprint(&e.skey),
+		log_printfs(&e.skey, "[+] setting dissector type %d\n",
 			   DISSECTOR_TYPE(data->dis.dissector_type));
 
 		unsigned ll = offsetof(struct msg_value, value) + 8;

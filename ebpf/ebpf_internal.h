@@ -35,6 +35,30 @@
 		}                                                                        \
 	})
 
+#define log_printfs(_skey, fmt, args...)				\
+	({                                                                               \
+		static const char *___fmt = fmt;                                         \
+		unsigned long long ___param[___bpf_narg(args)];                          \
+                                                                                         \
+		_Pragma("GCC diagnostic push")                                           \
+			_Pragma("GCC diagnostic ignored \"-Wint-conversion\"")           \
+				___bpf_fill(___param, args);                             \
+		_Pragma("GCC diagnostic pop")                                            \
+                                                                                         \
+			struct msg_value *_e = bpf_ringbuf_reserve(                       \
+				&msg_rb, sizeof(struct msg_value), 0);                   \
+		if (_e != NULL) {					\
+			_e->skey = *(_skey);				\
+			long l = bpf_snprintf(&_e->log[0], sizeof(_e->log), ___fmt,        \
+					      ___param, sizeof(___param));               \
+			unsigned ll = offsetof(struct msg_value, log) + l;               \
+			if (ll > sizeof(struct msg_value))                               \
+				ll = sizeof(struct msg_value);                           \
+			bpf_ringbuf_output(&msg_rb, _e, ll, 0);                           \
+			bpf_ringbuf_discard(_e, 0);                                       \
+		}                                                                        \
+	})
+
 /* Global metrics
  */
 struct {
