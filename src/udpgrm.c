@@ -102,6 +102,7 @@ static void sockaddr_from_msg_value(struct sockaddr_storage *ss, struct msg_valu
 	}
 }
 
+
 static int handle_msg(void *_ctx, void *data, size_t data_sz)
 {
 	struct handle_msg_ctx *ctx = _ctx;
@@ -120,7 +121,11 @@ static int handle_msg(void *_ctx, void *data, size_t data_sz)
 	}
 
 	if (e->type == MSG_LOG) {
-		printf("%.*s", (int)sizeof(e->log), (char *)&e->log);
+		if (e->skey.family != 0) {
+			printf("%s %.*s", skey_sprint(&e->skey), (int)sizeof(e->log), (char *)&e->log);
+		} else {
+			printf("%.*s", (int)sizeof(e->log), (char *)&e->log);
+		}
 	}
 
 	if (e->type == MSG_REGISTER_SOCKET) {
@@ -128,7 +133,7 @@ static int handle_msg(void *_ctx, void *data, size_t data_sz)
 		/*        e->cookie); */
 		int pidfd = pidfd_open(e->pid, 0);
 		if (pidfd < 0) {
-			printf("[!] %s Pid %d requested MSG_REGISTER_SOCKET, but have "
+			printf("%s [!] Pid %d requested MSG_REGISTER_SOCKET, but have "
 			       "died since, ignoring\n",
 			       skey_sprint(&e->skey), e->pid);
 			goto err;
@@ -204,7 +209,7 @@ static int handle_msg(void *_ctx, void *data, size_t data_sz)
 
 				uint32_t v;
 				grm_cookie_pack(e->socket_gen, free_pos, (uint8_t *)&v);
-				printf("[D] %s socket found so_cookie=0x%lx app=%d "
+				printf("%s [D] socket found so_cookie=0x%lx app=%d "
 				       "gen=%d/%d/%d idx=%d udpgrm_cookie=0x%04x\n",
 				       skey_sprint(&e->skey), s.so_cookie, s.sock_app,
 				       s.sock_gen, e->socket_gen, gen, free_pos, v);
@@ -234,7 +239,7 @@ static int handle_msg(void *_ctx, void *data, size_t data_sz)
 				close(f);
 			}
 		} else {
-			printf("[D] %s Socket not found. Pretty bad\n",
+			printf("%s [D] Socket not found. Pretty bad\n",
 			       skey_sprint(&e->skey));
 			metric_incr_critical(&e->skey, 1, 1);
 		}
@@ -244,7 +249,7 @@ static int handle_msg(void *_ctx, void *data, size_t data_sz)
 	}
 
 	if (e->type == MSG_SET_WORKING_GEN) {
-		printf("[D] %s Working gen app=%d %d curr=%d  %s label=%.*s\n",
+		printf("%s [D] Working gen app=%d %d curr=%d  %s label=%.*s\n",
 		       skey_sprint(&e->skey), e->app_idx, e->app_working_gen,
 		       state.working_gen[e->app_idx % MAX_APPS], ctx->tubular_path,
 		       LABEL_SZ, state.dis.label);
@@ -253,7 +258,7 @@ static int handle_msg(void *_ctx, void *data, size_t data_sz)
 
 		int err = tubular_maybe_register(&state, wg, ctx->tubular_path);
 		if (err) {
-			printf("[D] %s Tubular register failed: %s\n",
+			printf("%s [D] Tubular register failed: %s\n",
 			       skey_sprint(&e->skey), strerror(err));
 			metric_incr_critical(&e->skey, 1, 1);
 		} else {
