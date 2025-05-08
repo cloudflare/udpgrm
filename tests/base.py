@@ -7,6 +7,7 @@ import struct
 import subprocess
 import tempfile
 import time
+import re
 import unittest
 
 from . import utils
@@ -241,14 +242,17 @@ class TestCase(unittest.TestCase):
             selector = " 127.0.0.1:%d" % (port,)
         else:
             selector = ""
-        # only supports single socket group
+
+        # only supports single active socket group
         p = self.udpgrm_run("list -v%s" % selector)
         all_lines = '\n'.join(p.collect_stdout())
-        _, _, lines = all_lines.partition('metrics:')
-        if 'metrics:' in lines:
+        blocks = re.split(r"\n(?!\t)", all_lines)
+        if len(blocks) > 1 and " (old)\n" not in blocks[1]:
             print(all_lines)
             self.fail(
                 "Only one group supported in tests metrics. Make sure you dont have stale udpgrm daemons or REUSEPORT groups.")
+
+        _, _, lines = blocks[0].partition('metrics:')
         M = {}
         for line in lines.split('\n'):
             line = line.strip()

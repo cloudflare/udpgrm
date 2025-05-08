@@ -73,11 +73,11 @@ class BasicTest(base.TestCase):
         wrk_gen = sa.getsockopt(IPPROTO_UDP, UDP_GRM_WORKING_GEN)
         sa.setsockopt(IPPROTO_UDP, UDP_GRM_SOCKET_GEN, wrk_gen + 1)
         self.assertIn("socket group created", p.stdout_line())
+        self.assertIn("socket found", p.stdout_line())
         self.assertIn("registering socket", p.stdout_line())
         sa.setsockopt(IPPROTO_UDP, UDP_GRM_WORKING_GEN, wrk_gen + 1)
-        self.assertIn("socket found", p.stdout_line())
-        self.assertIn("setting working gen", p.stdout_line())
         self.assertIn("Working gen", p.stdout_line())
+        self.assertIn("setting working gen", p.stdout_line())
 
     def test_abi_check_loaded_daemon(self):
         ''' returns proto 92 with no loaded ebpf, and -1 with loaded '''
@@ -202,8 +202,8 @@ class BasicTest(base.TestCase):
         p.cont()
 
         self.assertIn('socket group created', p.stdout_line())
-        self.assertIn('registering socket', p.stdout_line())
         self.assertIn('socket found', p.stdout_line())
+        self.assertIn('registering socket', p.stdout_line())
         self.sync_socket_gen(sd, prev=0xffa1)
 
         # now socket gen = 1 and socket idx = 1
@@ -216,9 +216,9 @@ class BasicTest(base.TestCase):
 
         v = sd.getsockopt(IPPROTO_UDP, UDP_GRM_SOCKET_GEN, 12)
         self.assertEqual(v, struct.pack('III', 31, 0, 0x7f))
-        self.assertIn('registering socket', p.stdout_line())
         self.assertIn('weird', p.stdout_line())
         self.assertIn('socket found', p.stdout_line())
+        self.assertIn('registering socket', p.stdout_line())
         v = sd.getsockopt(IPPROTO_UDP, UDP_GRM_SOCKET_GEN, 12)
         self.assertEqual(v, struct.pack('III', 31, 0, 0x7f))
 

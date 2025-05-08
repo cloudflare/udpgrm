@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/bin/env -S python3 -u
 from systemd.daemon import notify
 import argparse
 import errno
