@@ -525,27 +525,28 @@ int udpgrm_setsockopt(struct bpf_sockopt *ctx)
 	if (ctx->optname == UDP_GRM_WORKING_GEN) {
 		int app_idx = s->sock_app % MAX_APPS;
 		{
-			int old = state->working_gen[app_idx];
-			state->working_gen[app_idx] = data->wrk.working_gen;
-
-			static struct msg_value e;
-			e.type = MSG_SET_WORKING_GEN;
-			e.app_idx = app_idx;
-			e.app_working_gen = data->wrk.working_gen;
-			_skey_from_bpf_sock(&e.skey, ctx->sk);
-
-			log_printf("[+] %s - setting working gen %d (old=%d) (app=%d)\n",
-				   skey_sprint(&e.skey), data->wrk.working_gen, old,
-				   app_idx);
-
-			unsigned ll = offsetof(struct msg_value, app_so_cookie) + 8;
-			int r = bpf_ringbuf_output(&msg_rb, &e, ll, 0);
-			if (r != 0) {
+			unsigned ev_size = offsetof(struct msg_value, app_so_cookie) + 8;
+			struct msg_value *event =
+				bpf_ringbuf_reserve(&msg_rb, ev_size, 0);
+			if (event == NULL) {
 				log_printf("[!] Error: rb failed: EGAIN\n");
 				// We don't incr critical metric as we return EGAIN
 				bpf_set_retval(-EAGAIN);
 				return 0;
 			}
+
+			int old = state->working_gen[app_idx];
+			state->working_gen[app_idx] = data->wrk.working_gen;
+
+			event->type = MSG_SET_WORKING_GEN;
+			event->app_idx = app_idx;
+			event->app_working_gen = data->wrk.working_gen;
+			_skey_from_bpf_sock(&event->skey, ctx->sk);
+
+			log_printf("[+] %s - setting working gen %d (old=%d) (app=%d)\n",
+				   skey_sprint(&event->skey), data->wrk.working_gen, old,
+				   app_idx);
+			bpf_ringbuf_submit(event, 0);
 		}
 
 		ctx->optlen = -1;
@@ -558,30 +559,33 @@ int udpgrm_setsockopt(struct bpf_sockopt *ctx)
 			// Socket gen is set to a new value or the socket is not yet
 			// registered. Post a message to udpgrm daemon to register with
 			// requested socket generation.
-			struct task_struct *ts = bpf_get_current_task_btf();
-
-			s->sock_gen = data->sk.socket_gen;
-
-			static struct msg_value e;
-			e.type = MSG_REGISTER_SOCKET;
-			e.pid = ts->pid;
-			e.socket_cookie = s->so_cookie;
-			e.socket_gen = data->sk.socket_gen;
-			e.socket_app = s->sock_app;
-			_skey_from_bpf_sock(&e.skey, ctx->sk);
-
-			log_printf("[+] %s - registering socket ", skey_sprint(&e.skey));
-			log_printf("so_cookie=0x%lx app=%d gen=%d pid=%d\n", s->so_cookie,
-				   s->sock_app, s->sock_gen, ts->pid);
-
-			unsigned ll = offsetof(struct msg_value, socket_app) + 8;
-			int r = bpf_ringbuf_output(&msg_rb, &e, ll, 0);
-			if (r != 0) {
+			unsigned ev_size = offsetof(struct msg_value, socket_app) + 8;
+			struct msg_value *event =
+				bpf_ringbuf_reserve(&msg_rb, ev_size, 0);
+			if (event == NULL) {
 				log_printf("[!] Error: rb failed, EGAIN\n");
 				// We don't incr critical metric as we return EGAIN
 				bpf_set_retval(-EAGAIN);
 				return 0;
 			}
+
+			struct task_struct *ts = bpf_get_current_task_btf();
+
+			s->sock_gen = data->sk.socket_gen;
+
+			event->type = MSG_REGISTER_SOCKET;
+			event->pid = ts->pid;
+			event->socket_cookie = s->so_cookie;
+			event->socket_gen = data->sk.socket_gen;
+			event->socket_app = s->sock_app;
+			_skey_from_bpf_sock(&event->skey, ctx->sk);
+
+			log_printf("[+] %s - registering socket ",
+				   skey_sprint(&event->skey));
+			log_printf("so_cookie=0x%lx app=%d gen=%d pid=%d\n", s->so_cookie,
+				   s->sock_app, s->sock_gen, ts->pid);
+
+			bpf_ringbuf_submit(event, 0);
 		}
 		ctx->optlen = -1;
 		bpf_set_retval(0);
@@ -647,26 +651,27 @@ int udpgrm_setsockopt(struct bpf_sockopt *ctx)
 			return 0;
 		}
 
-		memcpy(&state->dis, &data->dis, sizeof(struct udp_grm_dissector));
-		state->verbose = !!(data->dis.dissector_type & DISSECTOR_FLAG_VERBOSE);
-		state->dis.dissector_type = data->dis.dissector_type & ~DISSECTOR_FLAGS;
-
-		static struct msg_value e;
-		e.type = MSG_SET_DISSECTOR;
-		e.value = 0;
-		_skey_from_bpf_sock(&e.skey, ctx->sk);
-
-		log_printf("[+] %s - setting dissector type %d\n", skey_sprint(&e.skey),
-			   DISSECTOR_TYPE(data->dis.dissector_type));
-
-		unsigned ll = offsetof(struct msg_value, value) + 8;
-		int r = bpf_ringbuf_output(&msg_rb, &e, ll, 0);
-		if (r != 0) {
+		unsigned ev_size = offsetof(struct msg_value, value) + 8;
+		struct msg_value *event = bpf_ringbuf_reserve(&msg_rb, ev_size, 0);
+		if (event == NULL) {
 			log_printf("[!] Error: rb failed: EGAIN\n");
 			// We don't incr critical metric as we return EGAIN
 			bpf_set_retval(-EAGAIN);
 			return 0;
 		}
+
+		memcpy(&state->dis, &data->dis, sizeof(struct udp_grm_dissector));
+		state->verbose = !!(data->dis.dissector_type & DISSECTOR_FLAG_VERBOSE);
+		state->dis.dissector_type = data->dis.dissector_type & ~DISSECTOR_FLAGS;
+
+		event->type = MSG_SET_DISSECTOR;
+		event->value = 0;
+		_skey_from_bpf_sock(&event->skey, ctx->sk);
+
+		log_printf("[+] %s - setting dissector type %d\n",
+			   skey_sprint(&event->skey),
+			   DISSECTOR_TYPE(data->dis.dissector_type));
+		bpf_ringbuf_submit(event, 0);
 
 		ctx->optlen = -1;
 		bpf_set_retval(0);
