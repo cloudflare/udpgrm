@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Cloudflare, Inc.
+// Licensed under the Apache 2.0 license found in the LICENSE file or at:
+//     https://opensource.org/licenses/Apache-2.0
+
 pub const UDP_GRM_WORKING_GEN: libc::c_int = 200;
 pub const UDP_GRM_SOCKET_GEN: libc::c_int = 201;
 pub const UDP_GRM_DISSECTOR: libc::c_int = 202;

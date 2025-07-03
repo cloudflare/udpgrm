@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Cloudflare, Inc.
+# Licensed under the Apache 2.0 license found in the LICENSE file or at:
+#     https://opensource.org/licenses/Apache-2.0
+
 import socket
 from socket import AF_INET, AF_INET6, SOCK_DGRAM, SOL_SOCKET, SO_REUSEPORT, IPPROTO_UDP
 UDP_GRM_WORKING_GEN = 200

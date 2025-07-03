@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Cloudflare, Inc.
+// Licensed under the Apache 2.0 license found in the LICENSE file or at:
+//     https://opensource.org/licenses/Apache-2.0
+
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use udpgrm::types::{UdpGrmDissectorOpts, UdpGrmDissectorType};

@@ -1,6 +1,7 @@
 [package]
 name = "udpgrm"
 description = "Socket API bindings for udpgrm"
+license = "Apache-2.0"
 version = "0.1.1"
 edition = "2021"
 repository = "https://github.com/cloudflare/udpgrm-os"
