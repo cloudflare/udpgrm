@@ -1,10 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0-only
 /*
  * Part of the code adapted from bpf_dbg.c
  *
  * https://github.com/torvalds/linux/blob/master/tools/bpf/bpf_dbg.c
  *
  * Copyright 2013 Daniel Borkmann <borkmann@redhat.com>
- * Licensed under the GNU General Public License, version 2.0 (GPLv2)
+ * Copyright (c) 2025 Cloudflare, Inc.
+ * Licensed under the GNU General Public License Version 2 found in the ebpf/LICENSE file or at:
+ *     https://opensource.org/license/gpl-2-0
  */
 
 #ifndef BPF_MOD

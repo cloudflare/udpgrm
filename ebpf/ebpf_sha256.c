@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (c) 2025 Cloudflare, Inc.
+// Licensed under the GNU General Public License Version 2 found in the ebpf/LICENSE file or at:
+//     https://opensource.org/license/gpl-2-0
+
 struct sha256_buff {
 	uint32_t h[8];
 };

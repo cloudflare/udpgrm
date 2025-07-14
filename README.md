@@ -834,3 +834,11 @@ Since udpgrm knows which packet is "new", belonging to a fresh flow, it could sa
 
 We could implement something resembling SYN cookies but for QUIC, kicking in on queue overflow or rate limit. For  Retry packets, udpgrm could be used to validate the token.
 
+License
+=======
+
+The eBPF programs that udpgrm loads into the kernel at runtime, which consist of the files in
+the `ebpf/` subdirectory, are licensed under the [GPLv2](ebpf/LICENSE). Header files that are
+shared between eBPF and userland code are found in `include/` and are dual-licensed under the
+[GPLv2](ebpf/LICENSE) and the [Apache 2.0 license](LICENSE) at your option. All code not listed
+otherwise is licensed exclusively under the [Apache 2.0 license](LICENSE).

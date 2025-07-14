@@ -1,3 +1,13 @@
+// SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-only
+/* Copyright (c) 2025 Cloudflare, Inc.
+ * Licensed under either
+ * - the Apache 2.0 license found in the LICENSE file, or
+ * - the GNU General Public License Version 2 found in the ebpf/LICENSE file
+ * at your option. The licenses are also available online at, respectively:
+ *     https://opensource.org/license/apache-2-0
+ *     https://opensource.org/license/gpl-2-0
+ */
+
 /* Public API for udpgrm */
 
 #ifndef UDP_GRM_PUBLIC_H
