@@ -476,9 +476,9 @@ dependencies = [
 
 [[package]]
 name = "datagram-socket"
-version = "0.1.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96e5cb3e95acd9f2b93a1995491804c8856db427a0868a7a0a7b9fb3a3810867"
+checksum = "499a59f4b840b50f33b198e14b246f2f9ad9e93aa8da20da12c4b9200d25f963"
 dependencies = [
  "buffer-pool",
  "futures-util",
@@ -1706,29 +1706,9 @@ dependencies = [
 
 [[package]]
 name = "quiche"
-version = "0.21.0"
+version = "0.24.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7986f11a8f2c63ade53d9ce49ce46d912c8d4770defbb117e16fafae76d8b5e"
-dependencies = [
- "cmake",
- "either",
- "intrusive-collections",
- "libc",
- "libm",
- "log",
- "octets",
- "once_cell",
- "ring",
- "slab",
- "smallvec",
- "winapi",
-]
-
-[[package]]
-name = "quiche"
-version = "0.23.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1cbb048e05b5ff6cf61e6084b1b893bd5d3b73a00fc6bfdb2beb28b48cc255a"
+checksum = "88fa45f0d2e3fc7ca8b4306408f8b15df9a3b5ac70197f84dfc6ebf58fb7e26a"
 dependencies = [
  "boring",
  "cmake",
@@ -2302,10 +2282,11 @@ dependencies = [
 
 [[package]]
 name = "tokio-quiche"
-version = "0.1.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7ed29543678f22eda57b8516769588965249ba5e9a83986186a096b95fdf139"
+checksum = "8b802ce2d36505e2d92a8f2625259de9249f4c23e2507428d043deb33263d12e"
 dependencies = [
+ "anyhow",
  "boring",
  "buffer-pool",
  "crossbeam",
@@ -2319,8 +2300,7 @@ dependencies = [
  "nix 0.26.4",
  "octets",
  "pin-project",
- "quiche 0.23.7",
- "ring",
+ "quiche",
  "serde",
  "serde_with",
  "slog-scope",
@@ -2466,7 +2446,7 @@ dependencies = [
  "libc",
  "mio 0.8.11",
  "nix 0.28.0",
- "quiche 0.21.0",
+ "quiche",
  "ring",
  "signal-hook",
  "socket2",

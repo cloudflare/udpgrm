@@ -24,12 +24,12 @@ nix = { version = "0.28", default-features = false, features = ["socket", "uio",
 futures = "0.3"
 socket2 = { version = "0.5", features = ["all"] }
 tokio = { version = "1", features = ["rt", "macros", "net", "time"] }
-quiche = "0.21"
+quiche = "0.24"
 ring = "0.17"
 mio = { version = "0.8", features = ["net", "os-poll"] }
 clap = { version = "4", features = ["derive"] }
 url = "2"
 signal-hook = "0.3"
-tokio-quiche = "0.1"
+tokio-quiche = "0.6"
 boring = "4"
 udpgrm = { path = ".", features = ["socket2"] }

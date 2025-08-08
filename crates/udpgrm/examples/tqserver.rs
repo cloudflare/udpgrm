@@ -217,9 +217,10 @@ async fn handle_connection(mut controller: ServerH3Controller) {
                     CURRENT_SNI.lock().unwrap(),
                     headers,
                 );
-                send.send(OutboundFrame::Headers(vec![h3::Header::new(
-                    b":status", b"200",
-                )]))
+                send.send(OutboundFrame::Headers(
+                    vec![h3::Header::new(b":status", b"200")],
+                    None,
+                ))
                 .await
                 .unwrap();
 
