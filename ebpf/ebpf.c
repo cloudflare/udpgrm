@@ -560,7 +560,7 @@ int udpgrm_setsockopt(struct bpf_sockopt *ctx)
 			s->sock_gen = data->sk.socket_gen;
 
 			event->type = MSG_REGISTER_SOCKET;
-			event->pid = ts->pid;
+			event->pid = ts->tgid;
 			event->socket_cookie = s->so_cookie;
 			event->socket_gen = data->sk.socket_gen;
 			event->socket_app = s->sock_app;
@@ -568,7 +568,7 @@ int udpgrm_setsockopt(struct bpf_sockopt *ctx)
 
 			log_printfs(&event->skey, "[+] registering socket ");
 			log_printf("so_cookie=0x%lx app=%d gen=%d pid=%d\n", s->so_cookie,
-				   s->sock_app, s->sock_gen, ts->pid);
+				   s->sock_app, s->sock_gen, ts->tgid);
 
 			bpf_ringbuf_submit(event, 0);
 		}
