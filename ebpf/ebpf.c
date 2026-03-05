@@ -390,7 +390,7 @@ int udpgrm_reuseport_prog(struct sk_reuseport_md *md)
 }
 
 struct task_struct {
-	int pid;
+	int tgid;
 } __attribute__((preserve_access_index));
 
 int dissector_cmp(struct udp_grm_dissector *a, struct udp_grm_dissector *b)
